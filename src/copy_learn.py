@@ -1,5 +1,5 @@
 import copy
-
+# 数据结构 - 学习python
 # 原始数据：一个超级容易踩坑的嵌套结构
 original = {
     'name': 'Kevin',
