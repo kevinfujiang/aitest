@@ -1,0 +1,32 @@
+[project]
+name = "test1"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "xuxiaorong"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.12,<4.0.0"
+dependencies = [
+    "openai (>=2.17.0,<3.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "langchain (>=1.2.9,<2.0.0)",
+    "langchain-openai (>=1.1.8,<2.0.0)",
+    "langgraph (>=1.0.8,<2.0.0)",
+    "langgraph-supervisor (>=0.0.31,<0.0.32)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false
+packages = [
+    { include = "test1" }
+]
+
+[tool.flake8]
+max-line-length = 100
