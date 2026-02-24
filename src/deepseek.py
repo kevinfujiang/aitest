@@ -6,6 +6,15 @@ import httpx
 
 
 class SyncChat:
+    """同步聊天客户端类
+    
+    用于与本地Ollama服务进行同步聊天交互的客户端封装。
+    主要功能：
+    - 初始化OpenAI客户端连接本地Ollama服务
+    - 提供流式聊天响应功能
+    - 配置HTTP连接参数和超时设置
+    - 处理模型推理过程中的reasoning和content内容
+    """
     def __init__(self):
         self.client = OpenAI(
             base_url="http://127.0.0.1:11434/v1",

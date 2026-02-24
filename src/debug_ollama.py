@@ -1,6 +1,8 @@
 from openai import OpenAI
 import httpx
 
+# 连接本地的Ollama服务.
+
 # 创建自定义 httpx Client（兼容旧版）
 client = OpenAI(
     base_url="http://127.0.0.1:11434/v1",

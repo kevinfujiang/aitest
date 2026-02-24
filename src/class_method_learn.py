@@ -2,7 +2,14 @@ from typing import Any, Optional
 
 
 class MyClass:
-    """A simple example class"""
+    """演示类方法和实例方法区别的示例类
+    
+    该类用于展示类变量与实例变量的区别，以及类方法(@classmethod)和实例方法的使用差异。
+    主要功能：
+    - 通过类方法操作共享的类变量MAP
+    - 通过实例方法操作类变量（注意：实际修改的仍是类变量）
+    - 演示类变量在所有实例间共享的特性
+    """
 
     MAP = {}
 
