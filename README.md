@@ -34,7 +34,9 @@ test1/
 │   ├── function_learn.py       # 函数调用基础学习
 │   ├── function_tool.py        # 带日志的函数工具实现
 │   ├── multi_agent.py          # 多Agent协作示例
-│   └── single_agent.py         # 单Agent示例
+│   ├── single_agent.py         # 单Agent示例
+│   └── rag/                    # RAG（检索增强生成）相关示例
+│       └── rag_test.py         # 基于本地Ollama + ChromaDB 的RAG DEMO
 ├── .flake8                 # 代码规范配置
 ├── APPMOD_SETTINGS.md      # VS Code扩展配置说明
 ├── poetry.lock             # 依赖锁定文件
@@ -111,6 +113,13 @@ python src/multi_agent.py
 python src/deepseek.py
 ```
 
+### RAG 知识库问答示例
+
+```bash
+# 基于本地Ollama + ChromaDB 的简易RAG示例
+python src/rag/rag_test.py
+```
+
 ## 📖 核心功能说明
 
 ### 1. 函数调用 (Function Calling)
@@ -132,6 +141,16 @@ python src/deepseek.py
 
 - **deepseek.py**: 展示如何与不同模型进行流式对话
 - **debug_ollama.py**: Ollama服务连接调试工具
+
+### 4. RAG（检索增强生成）
+
+- **rag/rag_test.py**:
+  - 使用 `chromadb` 作为本地向量数据库，按需构建临时集合
+  - 通过 `/v1/chat/completions` 调用本地 Ollama（OpenAI 兼容接口）
+  - 核心接口：`rag_answer(question, texts)`，其中：
+    - `question`: 待提问的问题字符串
+    - `texts`: 知识库文档列表（`list[str]`），方便在不同知识库场景下评估回答质量
+  - 内部流程：问题向量化 → Top-K 文档检索（默认Top3）→ 将检索结果与问题一起构造成 prompt → 交给 LLM 生成回答
 
 ## ⚙️ 配置说明
 
