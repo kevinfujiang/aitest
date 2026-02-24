@@ -4,9 +4,9 @@ import uuid
 
 # ===================== 1. 配置Ollama参数 =====================
 OLLAMA_BASE_URL = "http://localhost:11434"
-# 可选：嵌入模型（mokaai/m3e-base 或 qwen3:4b-instruct-2507-q4_K_M 或 granite4:3b）
+# 可选：嵌入模型（mokaai/m3e-base 做本地知识库时, 使用这个模型）
 EMBEDDING_MODEL = "turingdance/m3e-base"
-# 生成式LLM
+# 生成式LLM (不同的模型验证效果)
 LLM_MODEL = "qwen3:4b"
 LLM_MODEL = "qwen3:4b-instruct-2507-q4_K_M"
 LLM_MODEL = "granite4:3b"
