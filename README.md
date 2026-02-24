@@ -36,7 +36,8 @@ test1/
 │   ├── multi_agent.py          # 多Agent协作示例
 │   ├── single_agent.py         # 单Agent示例
 │   └── rag/                    # RAG（检索增强生成）相关示例
-│       └── rag_test.py         # 基于本地Ollama + ChromaDB 的RAG DEMO
+│       ├── rag_test.py         # 基于本地Ollama + ChromaDB 的RAG DEMO
+│       └── ollama_api_format.md # Ollama API请求/响应格式说明与对比
 ├── .flake8                 # 代码规范配置
 ├── APPMOD_SETTINGS.md      # VS Code扩展配置说明
 ├── poetry.lock             # 依赖锁定文件
@@ -151,6 +152,10 @@ python src/rag/rag_test.py
     - `question`: 待提问的问题字符串
     - `texts`: 知识库文档列表（`list[str]`），方便在不同知识库场景下评估回答质量
   - 内部流程：问题向量化 → Top-K 文档检索（默认Top3）→ 将检索结果与问题一起构造成 prompt → 交给 LLM 生成回答
+
+- **rag/ollama_api_format.md**:
+  - 说明了 Ollama 原生 `/api/generate`、`/api/embeddings` 与 OpenAI 兼容 `/v1/chat/completions` 等接口的请求/响应格式
+  - 对比了不同调用方式下字段差异，便于排查“返回空响应”等集成问题
 
 ## ⚙️ 配置说明
 
