@@ -18,7 +18,6 @@ import json
 
 使用场景：学习OpenAI函数调用机制的基础示例
 """
-
 tools = [
     {
         "type": "function",
