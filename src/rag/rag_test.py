@@ -142,6 +142,7 @@ if __name__ == "__main__":
     answer = rag_answer(user_question, kb_texts)
     print(f"回答：{answer}")
     print("-" * 50)
+    print("\r")
 
     # 示例2: 知识库文本（可根据需要替换为任意知识库）
     kb_texts = [
@@ -156,3 +157,17 @@ if __name__ == "__main__":
     answer = rag_answer(user_question, kb_texts)
     print(f"回答：{answer}")
     print("-" * 50)
+    print("\r")
+
+    # 示例3: 知识库文本（可根据需要替换为任意知识库）
+    kb_texts = [
+        "2024年年终奖已发放完毕，标准为2个月工资",
+    ]
+
+    # 测试问题（可根据需要修改）
+    user_question = "2025年公司的年终奖怎么发？5月份我有4次迟到,会影响年终奖吗？"
+    print(f"问题：{user_question}")
+    answer = rag_answer(user_question, kb_texts)
+    print(f"回答：{answer}")
+    print("-" * 50)
+    print("\r")
