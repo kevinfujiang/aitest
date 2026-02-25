@@ -8,9 +8,9 @@ from langchain_community.document_loaders import UnstructuredMarkdownLoader
 from langchain_openai import ChatOpenAI
 
 
-OLLAMA_BASE_URL = "http://127.0.0.1:11434"
-EMBEDDING_MODEL = "turingdance/m3e-base"
-LLM_MODEL = "granite4:3b"
+OLLAMA_BASE_URL = "http://127.0.0.1:11434"  # 本地Ollama地址
+EMBEDDING_MODEL = "turingdance/m3e-base"  # 本地Ollama的嵌入模型,用于向量化文本
+LLM_MODEL = "granite4:3b"  # 本地Ollama的LLM模型,用于生成答案
 
 
 @dataclass

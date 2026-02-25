@@ -15,9 +15,10 @@
   - `langchain-openai` >= 1.1.8 - LangChain与OpenAI集成
   - `langgraph` >= 1.0.8 - 图形化工作流框架
   - `langgraph-supervisor` >= 0.0.31 - 多Agent协调框架
-- **HTTP客户端**: `httpx` >= 0.28.1
+- **HTTP客户端**: `httpx` >= 0.28.1、`requests`
 - **向量数据库**: `chromadb` >= 1.5.1
 - **嵌入模型**: `sentence-transformers` >= 5.2.3
+- **文档解析**: `langchain-community` >= 0.4.1、`unstructured` >= 0.4.16
 - **构建工具**: Poetry
 - **代码规范**: flake8 (最大行长度100字符)
 
@@ -25,21 +26,27 @@
 
 ```
 test1/
-├── src/                    # 源代码目录
-│   ├── __init__.py
-│   ├── class_method_learn.py    # 类方法学习示例
-│   ├── copy_learn.py           # 深浅拷贝学习
-│   ├── debug_ollama.py         # Ollama调试工具
-│   ├── deepseek.py             # DeepSeek模型调用示例
-│   ├── function_learn.py       # 函数调用基础学习
-│   ├── function_tool.py        # 带日志的函数工具实现
-│   ├── multi_agent.py          # 多Agent协作示例
-│   ├── single_agent.py         # 单Agent示例
-│   └── rag/                    # RAG（检索增强生成）相关示例
-│       ├── rag_test.py         # 基于本地Ollama + ChromaDB 的RAG DEMO
-│       └── ollama_api_format.md # Ollama API请求/响应格式说明与对比
+├── src/                        # 源代码目录
+│   ├── python_basics/           # Python 基础与模型调试
+│   │   ├── class_method_learn.py   # 类方法学习示例
+│   │   ├── copy_learn.py           # 深浅拷贝学习
+│   │   ├── debug_ollama.py         # Ollama 调试工具
+│   │   ├── deepseek.py             # DeepSeek 模型调用示例
+│   │   ├── dict_update_demo.py     # 字典更新示例
+│   │   └── explain_class_method.py # 类方法说明
+│   ├── function_calling/        # 函数调用
+│   │   ├── function_learn.py       # 函数调用基础学习
+│   │   └── function_tool.py        # 带日志的函数工具实现
+│   ├── agents/                  # Agent 示例
+│   │   ├── single_agent.py        # 单 Agent 示例
+│   │   └── multi_agent.py         # 多 Agent 协作示例
+│   └── rag/                     # RAG（检索增强生成）
+│       ├── rag_test.py            # 基于本地 Ollama + ChromaDB 的 RAG DEMO
+│       ├── sync_embedding.py      # Markdown 知识库同步向量到 Chroma 并问答
+│       ├── vectors_test.py       # 向量检索测试
+│       ├── ollama_api_format.md   # Ollama API 请求/响应格式说明
+│       └── 知识库_考核要求.md     # 示例知识库（考核与年终奖）
 ├── .flake8                 # 代码规范配置
-├── APPMOD_SETTINGS.md      # VS Code扩展配置说明
 ├── poetry.lock             # 依赖锁定文件
 ├── pyproject.toml          # 项目配置文件
 └── README.md               # 项目说明文档
@@ -67,13 +74,17 @@ ollama serve
 ollama pull qwen3:4b
 ollama pull llama3-groq-tool-use:8b
 ollama pull phi4-mini:latest
+
+# RAG 同步与问答（sync_embedding.py）所需模型
+ollama pull turingdance/m3e-base   # 嵌入模型
+ollama pull granite4:3b            # 对话模型
 ```
 
 ### 3. 验证环境
 
 ```bash
-# 测试Ollama连接
-python src/debug_ollama.py
+# 测试 Ollama 连接
+python src/python_basics/debug_ollama.py
 ```
 
 ## ▶️ 运行示例
@@ -82,80 +93,94 @@ python src/debug_ollama.py
 
 ```bash
 # 运行基础函数调用学习
-python src/function_learn.py
+python src/function_calling/function_learn.py
 ```
 
 ### 带日志的函数工具
 
 ```bash
 # 运行带日志记录的函数工具
-python src/function_tool.py
+python src/function_calling/function_tool.py
 # 日志将输出到控制台和 function_tool.log 文件
 ```
 
-### 单Agent示例
+### 单 Agent 示例
 
 ```bash
-# 运行单Agent计算器
-python src/single_agent.py
+# 运行单 Agent 计算器
+python src/agents/single_agent.py
 ```
 
-### 多Agent协作示例
+### 多 Agent 协作示例
 
 ```bash
-# 运行多Agent协调器
-python src/multi_agent.py
+# 运行多 Agent 协调器
+python src/agents/multi_agent.py
 ```
 
 ### 模型调用测试
 
 ```bash
-# 测试DeepSeek模型调用
-python src/deepseek.py
+# 测试 DeepSeek 模型调用
+python src/python_basics/deepseek.py
 ```
 
 ### RAG 知识库问答示例
 
 ```bash
-# 基于本地Ollama + ChromaDB 的简易RAG示例
+# 基于本地 Ollama + ChromaDB 的简易 RAG 示例（内存知识库）
 python src/rag/rag_test.py
 ```
+
+### RAG Markdown 知识库同步与问答
+
+```bash
+# 从 Markdown 同步向量到 Chroma，并按示例问题做检索问答
+python src/rag/sync_embedding.py
+```
+- 使用 `UnstructuredMarkdownLoader` 加载 Markdown，切块后经 Ollama `turingdance/m3e-base` 向量化写入 Chroma，问答使用 `granite4:3b`。
+- 文档块 id 使用「文件名_序号」保证多文件入库时唯一，避免覆盖。
 
 ## 📖 核心功能说明
 
 ### 1. 函数调用 (Function Calling)
 
-- **function_learn.py**: 展示如何使用OpenAI的函数调用功能
-- **function_tool.py**: 使用LangChain工具装饰器实现函数调用，并集成日志记录
+- **function_calling/function_learn.py**: 展示如何使用 OpenAI 的函数调用功能
+- **function_calling/function_tool.py**: 使用 LangChain 工具装饰器实现函数调用，并集成日志记录
 - 支持的工具函数：
   - `get_weather(city)`: 获取城市天气（模拟）
   - `get_current_time()`: 获取当前时间
   - `computing_time(start_time, end_time)`: 计算时间差
 
-### 2. Agent代理
+### 2. Agent 代理
 
-- **single_agent.py**: 单个Agent实现基本数学运算
-- **multi_agent.py**: 多Agent协作，包含时间代理和数学代理
-- 使用LangChain的Agent框架和LangGraph的监督器模式
+- **agents/single_agent.py**: 单 Agent 实现基本数学运算
+- **agents/multi_agent.py**: 多 Agent 协作，包含时间代理和数学代理
+- 使用 LangChain 的 Agent 框架和 LangGraph 的监督器模式
 
 ### 3. 模型交互
 
-- **deepseek.py**: 展示如何与不同模型进行流式对话
-- **debug_ollama.py**: Ollama服务连接调试工具
+- **python_basics/deepseek.py**: 展示如何与不同模型进行流式对话
+- **python_basics/debug_ollama.py**: Ollama 服务连接调试工具
 
 ### 4. RAG（检索增强生成）
 
-- **rag/rag_test.py**:
-  - 使用 `chromadb` 作为本地向量数据库，按需构建临时集合
-  - 通过 `/v1/chat/completions` 调用本地 Ollama（OpenAI 兼容接口）
-  - 核心接口：`rag_answer(question, texts)`，其中：
-    - `question`: 待提问的问题字符串
-    - `texts`: 知识库文档列表（`list[str]`），方便在不同知识库场景下评估回答质量
-  - 内部流程：问题向量化 → Top-K 文档检索（默认Top3）→ 将检索结果与问题一起构造成 prompt → 交给 LLM 生成回答
+- **rag/rag_test.py**  
+  - 使用 `chromadb` 作为本地向量数据库，按需构建临时集合  
+  - 通过 `/v1/chat/completions` 调用本地 Ollama（OpenAI 兼容接口）  
+  - 核心接口：`rag_answer(question, texts)`，其中 `question` 为问题字符串，`texts` 为知识库文档列表（`list[str]`）  
+  - 流程：问题向量化 → Top-K 文档检索（默认 Top3）→ 检索结果与问题组成 prompt → LLM 生成回答  
 
-- **rag/ollama_api_format.md**:
-  - 说明了 Ollama 原生 `/api/generate`、`/api/embeddings` 与 OpenAI 兼容 `/v1/chat/completions` 等接口的请求/响应格式
-  - 对比了不同调用方式下字段差异，便于排查“返回空响应”等集成问题
+- **rag/sync_embedding.py**  
+  - 从 Markdown 文件同步知识库到 Chroma：`UnstructuredMarkdownLoader` 加载 → 按块切分 → Ollama `/api/embeddings`（模型 `turingdance/m3e-base`）向量化 → 写入同一 collection  
+  - 文档块 id 使用「文件名_序号」保证多文件入库时唯一，避免重复 id 导致后写入文档未生效  
+  - 问答：问题向量检索 Top-K → 将检索到的资料与问题拼成 prompt → 使用 `granite4:3b`（OpenAI 兼容接口）生成回答  
+
+- **rag/ollama_api_format.md**  
+  - 说明 Ollama 原生 `/api/generate`、`/api/embeddings` 与 OpenAI 兼容 `/v1/chat/completions` 的请求/响应格式及字段差异，便于排查集成问题  
+
+- **rag/知识库_考核要求.md**  
+  - 示例知识库（考核与年终奖规则），用于配合 `sync_embedding.py` 做问答演示
 
 ## ⚙️ 配置说明
 
@@ -172,7 +197,7 @@ api_key = "ollama"
 
 ### 日志配置
 
-`function_tool.py` 中已配置日志系统：
+`function_calling/function_tool.py` 中已配置日志系统：
 - 输出级别：INFO
 - 输出格式：时间戳 - 级别 - 消息
 - 输出目标：控制台 + function_tool.log文件
@@ -203,7 +228,7 @@ MIT License
 
 ## 📧 联系方式
 
-作者: xuxiaorong
+作者: [Kevin Fujiang](mailto:kevin.fujiang@gmail.com)
 
 ---
 
