@@ -133,28 +133,36 @@ class SyncEmbedding:
         answer = llm_res.content if hasattr(llm_res, "content") else str(llm_res)
         return answer, results
 
+    def ask_with_knowledge_base(self, kb_file_name: str, question: str) -> Tuple[int, str]:
+        """给定知识库文件路径或名称，同步向量后对提问进行检索问答。
+
+        若 kb_file_name 非绝对路径，则相对于本脚本所在目录解析。
+        返回 (写入的文档块数, 答案)。
+        """
+        if not os.path.isabs(kb_file_name):
+            kb_file_name = os.path.join(os.path.dirname(__file__), kb_file_name)
+        inserted = self.insert_vector(kb_file_name)
+        answer, _ = self.query_vector(question)
+        return inserted, answer
+
 
 if __name__ == "__main__":
-    # 示例：从 Markdown 文件构建知识库并回答问题
-    markdown_path = os.path.join(os.path.dirname(__file__), "ollama_api_format.md")
     sync = SyncEmbedding(collection_name="demo_markdown_kb")
 
-    inserted = sync.insert_vector(markdown_path)
+    inserted, answer = sync.ask_with_knowledge_base(
+        "ollama_api_format.md",
+        "简要说明 Ollama /api/embeddings 接口的请求字段有哪些？",
+    )
     print(f"已向量化并写入 Chroma 的文档块数量：{inserted}")
-
-    question = "简要说明 Ollama /api/embeddings 接口的请求字段有哪些？"
-    answer, _ = sync.query_vector(question)
-    print("问题：", question)
-    print("回答：", answer)
-
-    print("-" * 50)
-    print("\r")
-    markdown_path = os.path.join(os.path.dirname(__file__), "知识库_考核要求.md")
-    inserted = sync.insert_vector(markdown_path)
-    print(f"已向量化并写入 Chroma 的文档块数量：{inserted}")
-    question = "2025年公司的年终奖怎么发？5月份我有4次迟到,会影响年终奖吗？"
-    answer, _ = sync.query_vector(question)
-    print("问题：", question)
+    print("问题：简要说明 Ollama /api/embeddings 接口的请求字段有哪些？")
     print("回答：", answer)
     print("-" * 50)
-    print("\r")
+
+    inserted, answer = sync.ask_with_knowledge_base(
+        "知识库_考核要求.md",
+        "2025年公司的年终奖怎么发？5月份我有4次迟到,会影响年终奖吗？",
+    )
+    print(f"已向量化并写入 Chroma 的文档块数量：{inserted}")
+    print("问题：2025年公司的年终奖怎么发？5月份我有4次迟到,会影响年终奖吗？")
+    print("回答：", answer)
+    print("-" * 50)
