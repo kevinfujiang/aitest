@@ -1,4 +1,5 @@
 import os
+import re
 from dataclasses import dataclass
 from typing import List, Tuple
 
@@ -60,24 +61,13 @@ class SyncEmbedding:
         loader = UnstructuredMarkdownLoader(file_path)
         docs = loader.load()
 
-        # 手动切分文档为小段，避免依赖额外的切分器包
+        # 按 Markdown 标题与段落边界做语义切分，减少在句中被截断
         split_docs: List[SimpleDoc] = []
         for doc in docs:
-            text = doc.page_content
             meta = doc.metadata or {}
-            length = len(text)
-            step = (
-                self.chunk_size - self.chunk_overlap
-                if self.chunk_size > self.chunk_overlap
-                else self.chunk_size
-            )
-            start = 0
-            while start < length:
-                end = start + self.chunk_size
-                chunk = text[start:end]
-                if chunk.strip():
-                    split_docs.append(SimpleDoc(page_content=chunk, metadata=meta))
-                start += step
+            for chunk_text in self._chunk_text_semantic(doc.page_content):
+                if chunk_text.strip():
+                    split_docs.append(SimpleDoc(page_content=chunk_text, metadata=meta))
 
         ids: List[str] = []
         embeddings: List[List[float]] = []
@@ -132,6 +122,79 @@ class SyncEmbedding:
         llm_res = self.llm.invoke(prompt)
         answer = llm_res.content if hasattr(llm_res, "content") else str(llm_res)
         return answer, results
+
+    def _chunk_text_semantic(self, text: str) -> List[str]:
+        """按 Markdown 标题与段落边界切分，超长时再按长度与重叠切分，尽量不截断句意。"""
+        if not text.strip():
+            return []
+
+        # 1. 按 Markdown 标题切分（保留标题与其后内容在同一块）
+        header_pattern = re.compile(r"(?m)^(?=#{1,6}\s)", re.MULTILINE)
+        sections = [s.strip() for s in header_pattern.split(text) if s.strip()]
+
+        chunks: List[str] = []
+        for section in sections:
+            if len(section) <= self.chunk_size:
+                chunks.append(section)
+                continue
+            # 2. 超长段落再按「双换行」拆成段落
+            paragraphs = [p.strip() for p in section.split("\n\n") if p.strip()]
+            current: List[str] = []
+            current_len = 0
+            for para in paragraphs:
+                if current_len + len(para) + 2 <= self.chunk_size:
+                    current.append(para)
+                    current_len += len(para) + 2
+                else:
+                    if current:
+                        chunks.append("\n\n".join(current))
+                    if len(para) <= self.chunk_size:
+                        current = [para]
+                        current_len = len(para) + 2
+                    else:
+                        # 3. 单段仍超长：按句/行边界切，再按长度+重叠
+                        for sub in self._split_long_paragraph(para):
+                            chunks.append(sub)
+                        current = []
+                        current_len = 0
+            if current:
+                chunks.append("\n\n".join(current))
+
+        return chunks
+
+    def _split_long_paragraph(self, paragraph: str) -> List[str]:
+        """将超长单段按句/行切分，再按 chunk_size 与 chunk_overlap 滑动。"""
+        # 先按句子边界切（中英文句号、换行）
+        parts = re.split(r"(?<=[。！？.!?\n])", paragraph)
+        parts = [p.strip() for p in parts if p.strip()]
+        if not parts:
+            parts = [paragraph]
+
+        result: List[str] = []
+        buf: List[str] = []
+        buf_len = 0
+        for p in parts:
+            if buf_len + len(p) + 1 <= self.chunk_size:
+                buf.append(p)
+                buf_len += len(p) + 1
+            else:
+                if buf:
+                    result.append("".join(buf))
+                # 当前片段仍超长则按固定长度+重叠切
+                if len(p) > self.chunk_size:
+                    step = max(1, self.chunk_size - self.chunk_overlap)
+                    start = 0
+                    while start < len(p):
+                        result.append(p[start : start + self.chunk_size])
+                        start += step
+                    buf = []
+                    buf_len = 0
+                else:
+                    buf = [p]
+                    buf_len = len(p) + 1
+        if buf:
+            result.append("".join(buf))
+        return result
 
     def ask_with_knowledge_base(self, kb_file_name: str, question: str) -> Tuple[int, str]:
         """给定知识库文件路径或名称，同步向量后对提问进行检索问答。
