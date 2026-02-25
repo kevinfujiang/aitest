@@ -58,7 +58,7 @@ test1/
 
 ```bash
 # 使用Poetry安装依赖
-cd /Users/xuxiaorong/Code/demo/ai/test1
+cd ~/Code/demo/ai/test1
 poetry install
 ```
 
