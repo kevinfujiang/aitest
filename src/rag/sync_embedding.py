@@ -94,8 +94,12 @@ class SyncEmbedding:
         if not ids:
             return 0
 
+        # 使用「文件名 + 序号」作为唯一 id，避免多次 insert 不同文件时 id 冲突导致后写入的文档无法入库
+        base_name = os.path.basename(file_path)
+        unique_ids = [f"{base_name}_{i}" for i in ids]
+
         self.collection.add(
-            ids=ids,
+            ids=unique_ids,
             embeddings=embeddings,
             documents=contents,
             metadatas=metadatas,
@@ -142,3 +146,15 @@ if __name__ == "__main__":
     answer, _ = sync.query_vector(question)
     print("问题：", question)
     print("回答：", answer)
+
+    print("-" * 50)
+    print("\r")
+    markdown_path = os.path.join(os.path.dirname(__file__), "知识库_考核要求.md")
+    inserted = sync.insert_vector(markdown_path)
+    print(f"已向量化并写入 Chroma 的文档块数量：{inserted}")
+    question = "2025年公司的年终奖怎么发？5月份我有4次迟到,会影响年终奖吗？"
+    answer, _ = sync.query_vector(question)
+    print("问题：", question)
+    print("回答：", answer)
+    print("-" * 50)
+    print("\r")
