@@ -28,7 +28,7 @@ class SyncEmbedding:
         self.chunk_overlap = chunk_overlap
 
         # 本地 Chroma 向量库
-        self.chroma_client = chromadb.Client()
+        self.chroma_client = chromadb.PersistentClient(path="./my_local_chroma_kb")
         self.collection = self.chroma_client.get_or_create_collection(name=collection_name)
 
         # 本地 Ollama LLM（OpenAI 兼容接口）
